@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm";
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Field, ID, ObjectType, Root } from 'type-graphql';
 
 @ObjectType()
 @Entity()
@@ -17,10 +17,6 @@ export class User extends BaseEntity {
     @Column()
     lastName: string;
 
-    // no column here, just a graphql schema to concatenate firstname and lastname
-    @Field()
-    name: string;
-
     @Field()
     @Column('text', { unique: true })
     email: string;
@@ -28,5 +24,11 @@ export class User extends BaseEntity {
     // no field, we dont want to expose the password
     @Column()
     password: string;
+
+    // no column here, just a graphql schema to concatenate firstname and lastname
+    @Field()
+    name(@Root() parent: User): string {
+        return `${parent.firstName} ${parent.lastName}`
+    }
 
 }
