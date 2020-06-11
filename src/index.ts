@@ -17,11 +17,18 @@ const main = async () => {
 
     const schema = await buildSchema({
         resolvers: [RegisterResolver, LoginResolver, MeResolver],
+        authChecker: ({ context: {req} }) => {
+            // here we can read the user from context
+            // and check his permission in the db against the `roles` argument
+            // that comes from the `@Authorized` decorator, eg. ["ADMIN", "MODERATOR"]
+
+           return !!req.session.userId;
+        }
     });
 
     const apolloServer = new ApolloServer({
         schema,
-        context: ({req}) => ({req}) // access to express request in our resolvers
+        context: ({req}) => ({req}), // access to express request in our resolvers
     });
 
     const app = Express();
