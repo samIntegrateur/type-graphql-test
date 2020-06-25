@@ -3,20 +3,17 @@ import Express  from 'express';
 import { buildSchema } from 'type-graphql';
 import "reflect-metadata";
 import { createConnection } from 'typeorm';
-import { RegisterResolver } from './modules/user/Register';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
 import { redis } from './redis';
 import cors from 'cors';
-import { LoginResolver } from './modules/user/Login';
-import { MeResolver } from './modules/user/Me';
 
 const main = async () => {
 
     await createConnection();
 
     const schema = await buildSchema({
-        resolvers: [RegisterResolver, LoginResolver, MeResolver],
+        resolvers: [__dirname + '/modules/**/*.ts'], // avoid importing one by one
         authChecker: ({ context: {req} }) => {
             // here we can read the user from context
             // and check his permission in the db against the `roles` argument
@@ -28,7 +25,7 @@ const main = async () => {
 
     const apolloServer = new ApolloServer({
         schema,
-        context: ({req}) => ({req}), // access to express request in our resolvers
+        context: ({req, res}) => ({req, res}), // access to express request in our resolvers
     });
 
     const app = Express();
@@ -61,7 +58,7 @@ const main = async () => {
     apolloServer.applyMiddleware({ app });
 
     app.listen(4000, () => {
-        console.log('server started');
+        console.log('server started on http://localhost:4000/graphql');
     });
 };
 

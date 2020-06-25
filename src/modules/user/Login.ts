@@ -21,6 +21,12 @@ export class LoginResolver {
         const valid = await bcrypt.compare(password, user.password);
 
         if (!valid) {
+            console.log('invalid password');
+            return null;
+        }
+
+        if (!user.confirmed) {
+            console.log('user not confirmed');
             return null;
         }
 
