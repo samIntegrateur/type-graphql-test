@@ -13,52 +13,56 @@ afterAll(async () => {
     await cnx.close();
 })
 
-const registerMutation = `
-    mutation Register($data: RegisterInput!) {
-      register(
-        data: $data
-      ) {
-        id
-        firstName
-        lastName
-        email
-        name
-      }
+const meQuery = `
+    {
+        me {
+            id
+            firstName
+            lastName
+            email
+        }
     }
 `;
 
-describe('Register', () => {
-    it("create user", async () => {
+describe('Me', () => {
+    it("get user", async () => {
 
-        const user = {
+        const user = await User.create({
             email: faker.internet.email(),
             password: faker.internet.password(),
             firstName: faker.name.firstName(),
             lastName: faker.name.lastName(),
-        };
+        }).save();
 
         const response = await gCall({
-            source: registerMutation,
-            variableValues: {
-                data: user
-            }
+            source: meQuery,
+            userId: user.id,
         });
 
         // console.log('response', response);
 
         expect(response).toMatchObject({
             data: {
-                register: {
-                    firstName: user.firstName,
+                me: {
+                    id: `${user.id}`,
                     lastName: user.lastName,
+                    firstName: user.firstName,
                     email: user.email,
                 }
             }
         })
 
-        const dbUser = await User.findOne({ where: {email: user.email}});
-        expect(dbUser).toBeDefined();
-        expect(dbUser!.confirmed).toBeFalsy();
-        expect(dbUser!.firstName).toBe(user.firstName);
-    })
+    });
+
+    it("return null if userId is not provided", async () => {
+        const response = await gCall({
+            source: meQuery,
+        });
+
+        expect(response).toMatchObject({
+            data: {
+                me: null
+            }
+        })
+    });
 })
