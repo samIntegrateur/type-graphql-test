@@ -13,3 +13,10 @@ note to myself : run .\redis-server.exe redis.windows.conf then .\redis-cli.exe 
 This project uses typeorm, so you need to have a ormconfig.json file at root to specify the database
 
 note to myself : it's postgres, you can check it running pgadmin4
+
+## File upload
+In order to test file upload without FE, see https://youtu.be/s35EmAn9Zl8?t=199
+
+Below the operations value :
+
+{"query":"mutation AddProfilePicture($picture: Upload!) {\n addProfilePicture(picture: $picture)\n}"}
